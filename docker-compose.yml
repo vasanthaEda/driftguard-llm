@@ -1,0 +1,48 @@
+# Optional local demo stack: driftguard-llm + Prometheus (scraping /metrics)
+# + Grafana (pre-provisioned with the driftguard dashboard). Not required
+# to build, test, or run the API standalone -- `uvicorn app.api:app` works
+# with zero external services. This is purely for seeing the monitoring
+# plane end-to-end.
+#
+#   docker compose up --build
+#   API:        http://localhost:8000/docs
+#   Prometheus: http://localhost:9090
+#   Grafana:    http://localhost:3000  (admin/admin)
+services:
+  driftguard:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DRIFTGUARD_EMBEDDER_BACKEND: fake
+      DRIFTGUARD_JUDGE_BACKEND: heuristic
+      DRIFTGUARD_LLM_BACKEND: fake
+    volumes:
+      - driftguard-data:/data
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    depends_on:
+      - driftguard
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  driftguard-data:

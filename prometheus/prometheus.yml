@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: driftguard-llm
+    static_configs:
+      - targets: ["driftguard:8000"]
+
+rule_files:
+  - /etc/prometheus/alert_rules.yml
