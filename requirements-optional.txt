@@ -1,0 +1,16 @@
+# Optional, heavier integrations. NOT required to build, run the API in
+# fake/offline mode, or run the unit test suite. Install these only if you
+# want to wire driftguard-llm to real production backends.
+#
+#   pip install -r requirements.txt -r requirements-optional.txt
+#
+# evidently        -> data/embedding drift HTML reports (evidently_report.py)
+# qdrant-client     -> Qdrant-backed vector store (vector_store_qdrant.py)
+# psycopg[binary]   -> pgvector-backed vector store (vector_store_pgvector.py)
+# openai            -> real embeddings + real LLM-as-judge backend
+# langchain-text-splitters -> production-grade recursive chunking
+evidently>=0.4,<0.5
+qdrant-client>=1.9,<2.0
+psycopg[binary]>=3.1,<4.0
+openai>=1.30,<2.0
+langchain-text-splitters>=0.2,<1.0
