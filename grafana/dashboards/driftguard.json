@@ -1,0 +1,88 @@
+{
+  "title": "driftguard-llm: drift + quality",
+  "uid": "driftguard-llm",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Drift status (0=ok, 1=warn, 2=critical)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "driftguard_drift_status", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 2 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Mean PSI across random embedding projections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 },
+      "targets": [{ "expr": "driftguard_drift_mean_psi", "refId": "A" }]
+    },
+    {
+      "id": 3,
+      "title": "KS-test reject fraction",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "driftguard_drift_ks_reject_fraction", "refId": "A" }]
+    },
+    {
+      "id": 4,
+      "title": "Centroid cosine similarity (reference vs current)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{ "expr": "driftguard_drift_centroid_cosine_similarity", "refId": "A" }]
+    },
+    {
+      "id": 5,
+      "title": "Rolling LLM-as-judge quality (faithfulness / relevance)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "driftguard_quality_faithfulness_avg", "refId": "A", "legendFormat": "faithfulness" },
+        { "expr": "driftguard_quality_relevance_avg", "refId": "B", "legendFormat": "relevance" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Query volume",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 16 },
+      "targets": [{ "expr": "rate(driftguard_queries_total[5m])", "refId": "A" }]
+    },
+    {
+      "id": 7,
+      "title": "Query latency (p50/p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 16 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, rate(driftguard_query_latency_seconds_bucket[5m]))", "refId": "A", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, rate(driftguard_query_latency_seconds_bucket[5m]))", "refId": "B", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Alerts fired / re-embed triggers",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 16 },
+      "targets": [
+        { "expr": "increase(driftguard_alerts_fired_total[1h])", "refId": "A", "legendFormat": "alerts fired" },
+        { "expr": "increase(driftguard_reembed_triggered_total[1h])", "refId": "B", "legendFormat": "re-embed triggered" }
+      ]
+    }
+  ]
+}

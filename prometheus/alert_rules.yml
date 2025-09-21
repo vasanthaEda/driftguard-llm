@@ -1,0 +1,45 @@
+groups:
+  - name: driftguard-llm
+    rules:
+      - alert: EmbeddingDriftDetected
+        expr: driftguard_drift_status >= 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "driftguard-llm: embedding drift detected"
+          description: >
+            driftguard_drift_status has been >= 1 (warn) for 5 minutes.
+            Check /admin/drift for the current PSI / KS / centroid-cosine
+            breakdown; sustained WARN/CRITICAL will also trigger the
+            in-app alert engine's re-embedding hook.
+
+      - alert: EmbeddingDriftCritical
+        expr: driftguard_drift_status == 2
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "driftguard-llm: CRITICAL embedding drift"
+          description: "driftguard_drift_status == 2 (critical) for 2 minutes."
+
+      - alert: RollingFaithfulnessDegraded
+        expr: driftguard_quality_faithfulness_avg < 0.6
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "driftguard-llm: rolling faithfulness below threshold"
+          description: >
+            The LLM-as-judge eval sampler's rolling mean faithfulness has
+            been below 0.6 for 10 minutes -- production answers are
+            drifting away from being grounded in retrieved context.
+
+      - alert: RollingRelevanceDegraded
+        expr: driftguard_quality_relevance_avg < 0.6
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "driftguard-llm: rolling relevance below threshold"
+          description: "Rolling mean relevance below 0.6 for 10 minutes."
